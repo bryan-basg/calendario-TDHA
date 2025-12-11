@@ -1,0 +1,90 @@
+/* src/components/Auth.css */
+.auth-container {
+    max-width: 440px;
+    margin: 4rem auto;
+    padding: var(--space-xl);
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--neutral-100);
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.auth-header h2 {
+    color: var(--primary-900);
+    margin-bottom: var(--space-xs);
+    font-size: 1.75rem;
+}
+
+.auth-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.auth-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    font-size: 0.9rem;
+    border: 1px solid #fee2e2;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+}
+
+.auth-form .form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.auth-footer {
+    margin-top: var(--space-xl);
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--neutral-100);
+}
+
+.auth-footer a {
+    color: var(--primary-600);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+    color: var(--primary-800);
+}
+
+/* Enhancements for inputs in auth context */
+.auth-form .input-field {
+    background-color: var(--neutral-50);
+}
+
+.auth-form .input-field:focus {
+    background-color: white;
+}

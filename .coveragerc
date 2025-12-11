@@ -1,0 +1,11 @@
+[run]
+omit =
+    tests/*
+    legacy_tests/*
+    debug_*.py
+    verify_*.py
+    seed_db.py
+    list_tables.py
+    test_*.py
+    create_db.py
+    crear_tablas.py

@@ -48,7 +48,7 @@ def test_models():
             start_time=datetime.now(),
             end_time=datetime.now() + timedelta(hours=1),
             user_id=user.id,
-
+            category_id=category.id
         )
         db.add(event)
         db.commit()
