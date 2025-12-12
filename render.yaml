@@ -1,3 +1,5 @@
+version: "1"
+
 services:
   # Backend Web Service
   - type: web
@@ -24,7 +26,7 @@ services:
     env: static
     region: oregon
     buildCommand: "cd frontend && npm install && npm run build"
-    staticPublishPath: "./frontend/dist"
+    publishPath: "./frontend/dist"
     envVars:
       - key: VITE_API_URL
         fromService:
