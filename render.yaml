@@ -23,9 +23,10 @@ services:
   # Frontend Static Site
   - type: web
     name: calendario-tdha-web-prod
-    env: static
+    runtime: static
+    region: oregon
     buildCommand: "cd frontend && npm install && npm run build"
-    publishPath: "./frontend/dist"
+    staticPublishPath: "./frontend/dist"
     envVars:
       - key: VITE_API_URL
         fromService:
