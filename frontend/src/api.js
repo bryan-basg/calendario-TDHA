@@ -1,4 +1,5 @@
 // src/api.js
+import toast from 'react-hot-toast';
 import axios from 'axios';
 
 // Base URL for the backend API
@@ -15,13 +16,42 @@ api.interceptors.request.use((config) => {
     return config;
 }, (error) => Promise.reject(error));
 
-// Response interceptor to handle 401s
+// Response interceptor to handle errors
 api.interceptors.response.use((response) => response, (error) => {
-    if (error.response && error.response.status === 401) {
-        localStorage.removeItem('access_token');
-        if (window.location.pathname !== '/login') {
-            window.location.href = '/login';
+    let message = 'Error desconocido';
+    if (error.response) {
+        // Server responded with a status code other than 2xx
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 401) {
+            // handled below
+        } else if (status === 403) {
+            message = 'No tienes permiso para realizar esta acción.';
+            toast.error(message);
+        } else if (status >= 500) {
+            message = 'Error del servidor. Por favor, intenta más tarde.';
+            toast.error(message);
+        } else {
+            // Try to extract detail
+            message = data.detail || 'Error en la solicitud.';
+            if (typeof message === 'object') message = JSON.stringify(message);
+            toast.error(message);
         }
+
+        if (status === 401) {
+            localStorage.removeItem('access_token');
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+        }
+    } else if (error.request) {
+        // Request made but no response
+        message = 'Error de conexión. Verifica tu internet.';
+        toast.error(message);
+    } else {
+        message = error.message;
+        toast.error(message);
     }
     return Promise.reject(error);
 });
@@ -123,9 +153,9 @@ export const deleteEvent = async (eventId) => {
     await api.delete(`/events/${eventId}`);
 };
 
-export const getTimeline = async (start, end) => {
+export const getTimeline = async (start, end, skip = 0, limit = 1000) => {
     // start and end should be ISO strings or Date objects
-    const params = {};
+    const params = { skip, limit };
     if (start) params.start = start;
     if (end) params.end = end;
 

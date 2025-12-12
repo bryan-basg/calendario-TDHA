@@ -34,6 +34,7 @@ class User(Base):
     # Relaciones
     events = relationship("Event", back_populates="owner")
     tasks = relationship("Task", back_populates="owner")
+    categories = relationship("Category", back_populates="owner")
     push_subscriptions = relationship("PushSubscription", back_populates="owner")
     focus_sessions = relationship("FocusSession", back_populates="owner")
 
@@ -44,6 +45,9 @@ class Category(Base):
     name = Column(String, index=True)
     # El verde esmeralda por defecto que te gusta
     color_hex = Column(String, default="#50C878")
+
+    user_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="categories")
 
 
 class Event(Base):

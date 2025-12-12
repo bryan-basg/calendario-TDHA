@@ -21,9 +21,9 @@ def read_categories(
 ):
     """
     Obtener lista de categorías.
-    Las categorías son globales y todos los usuarios autenticados pueden verlas.
+    Solo se devuelven las categorías creadas por el usuario autenticado.
     """
-    return crud.get_categories(db, skip=skip, limit=limit)
+    return crud.get_categories(db, user_id=current_user.id, skip=skip, limit=limit)
 
 
 @router.get("/{category_id}", response_model=schemas.Category)
@@ -32,10 +32,17 @@ def read_category(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Obtener una categoría específica por ID."""
+    """Obtener una categoría específica por ID. Solo el dueño puede verla."""
     db_category = crud.get_category(db, category_id=category_id)
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
+
+    # Verificar propiedad
+    if db_category.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to view this category"
+        )
+
     return db_category
 
 
@@ -46,21 +53,9 @@ def create_category(
     current_user: models.User = Depends(get_current_user),
 ):
     """
-    Crear una nueva categoría.
-
-    NOTA: Actualmente las categorías son globales y cualquier usuario autenticado
-    puede crear categorías. Para restringir a solo administradores:
-
-    1. Agregar campo 'is_admin' en el modelo User
-    2. Descomentar las siguientes líneas:
-
-    # if not getattr(current_user, 'is_admin', False):
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Only administrators can create categories"
-    #     )
+    Crear una nueva categoría privada para el usuario autenticado.
     """
-    return crud.create_category(db=db, category=category)
+    return crud.create_category(db=db, category=category, user_id=current_user.id)
 
 
 @router.put("/{category_id}", response_model=schemas.Category)
@@ -71,23 +66,18 @@ def update_category(
     current_user: models.User = Depends(get_current_user),
 ):
     """
-    Actualizar una categoría existente.
-
-    NOTA: Actualmente las categorías son globales. Para agregar permisos:
-
-    Opción 1 - Solo admins pueden editar:
-    # if not getattr(current_user, 'is_admin', False):
-    #     raise HTTPException(status_code=403, detail="Admin access required")
-
-    Opción 2 - Agregar owner_id a categorías y verificar propiedad:
-    # db_category = crud.get_category(db, category_id)
-    # if db_category.owner_id != current_user.id and not getattr(current_user, 'is_admin', False):
-    #     raise HTTPException(status_code=403, detail="Not authorized")
+    Actualizar una categoría existente. Solo el dueño puede editarla.
     """
-    db_category = crud.update_category(db, category_id, category)
+    db_category = crud.get_category(db, category_id)
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
-    return db_category
+
+    if db_category.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to edit this category"
+        )
+
+    return crud.update_category(db, category_id, category)
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -97,17 +87,15 @@ def delete_category(
     current_user: models.User = Depends(get_current_user),
 ):
     """
-    Eliminar una categoría.
-
-    NOTA: Actualmente las categorías son globales. Para agregar permisos:
-
-    # if not getattr(current_user, 'is_admin', False):
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Only administrators can delete categories"
-    #     )
+    Eliminar una categoría. Solo el dueño puede eliminarla.
     """
-    db_category = crud.delete_category(db, category_id)
+    db_category = crud.get_category(db, category_id)
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
-    return None
+
+    if db_category.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this category"
+        )
+
+    return crud.delete_category(db, category_id)

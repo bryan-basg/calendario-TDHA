@@ -7,6 +7,7 @@ import CalendarComponent from '../components/CalendarComponent';
 import ProductivityTracker from '../components/ProductivityTracker';
 import DetailsModal from '../components/DetailsModal';
 import moment from 'moment';
+import SkeletonLoader from '../components/SkeletonLoader';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -162,7 +163,7 @@ const Dashboard = () => {
                 <div className="dashboard-calendar-section">
                     <ProductivityTracker />
                     {loading ? (
-                        <div className="loading-state">{t('common.loading_calendar')}</div>
+                        <SkeletonLoader type="calendar" />
                     ) : (
                         <CalendarComponent
                             events={events}

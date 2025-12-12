@@ -1,0 +1,38 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: calendario-TDHA
+    env: python
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calendario-tdha-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: "https://calendario-tdha-frontend.onrender.com"  # Render will update this automatically if we could link it, but usually manual or internal.
+      - key: ENVIRONMENT
+        value: "production"
+
+  # Frontend Static Site
+  - type: static
+    name: calendario-tdha-frontend
+    env: static
+    region: oregon
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: "./frontend/dist"
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: calendario-TDHA
+          property: url
+
+databases:
+  - name: calendario-tdha-db
+    region: oregon
+    plan: free

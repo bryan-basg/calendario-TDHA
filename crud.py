@@ -12,12 +12,20 @@ from auth import get_password_hash
 
 
 # --- CATEGORÍAS (Categories) ---
-def get_categories(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Category).offset(skip).limit(limit).all()
+def get_categories(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return (
+        db.query(models.Category)
+        .filter(models.Category.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
-def create_category(db: Session, category: schemas.CategoryCreate):
-    db_category = models.Category(name=category.name, color_hex=category.color_hex)
+def create_category(db: Session, category: schemas.CategoryCreate, user_id: int):
+    db_category = models.Category(
+        name=category.name, color_hex=category.color_hex, user_id=user_id
+    )
     db.add(db_category)
     db.commit()
     db.refresh(db_category)

@@ -1,4 +1,5 @@
 // src/App.jsx
+import { Toaster } from 'react-hot-toast';
 import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ const App = () => {
 
     return (
         <Router>
+            <Toaster position="top-right" />
             <Suspense fallback={<LoadingSpinner />}>
                 <Routes>
                     <Route path="/login" element={<LoginForm />} />

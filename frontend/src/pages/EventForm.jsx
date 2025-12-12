@@ -1,5 +1,6 @@
 // src/pages/EventForm.jsx
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createEvent, getEvent, updateEvent, getCategories } from '../api';
@@ -67,13 +68,15 @@ const EventForm = () => {
         try {
             if (isEdit) {
                 await updateEvent(id, payload);
+                toast.success(t('events.updated_success', 'Evento actualizado correctamente'));
             } else {
                 await createEvent(payload);
+                toast.success(t('events.created_success', 'Evento creado correctamente'));
             }
             navigate('/events');
         } catch (err) {
             console.error('Error saving event', err);
-            setError(t('events.save_error', 'Error al guardar el evento'));
+            // Error toast handled by api interceptor
         }
     };
 

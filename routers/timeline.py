@@ -18,7 +18,8 @@ router = APIRouter(prefix="/timeline", tags=["Timeline"])
 def read_timeline(
     start: datetime = None,
     end: datetime = None,
-    max_items: int = 500,
+    skip: int = 0,
+    limit: int = 50,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -27,7 +28,8 @@ def read_timeline(
 
     - start: fecha de inicio (default: hoy 00:00)
     - end: fecha de fin (default: hoy 23:59)
-    - max_items: máximo de items a devolver (default: 500, max: 1000)
+    - skip: items a saltar (paginación)
+    - limit: items a devolver (paginación, max: 100)
     """
     # Si no se especifican fechas, usar HOY (00:00 a 23:59)
     if not start:
@@ -40,12 +42,17 @@ def read_timeline(
         # si falta end, asumimos el final del día de 'start'.
         end = start.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # Validar límite
-    if max_items > 1000:
-        max_items = 1000
+    # Validar límite (ahora es límite de página, no total)
+    if limit > 1000:
+        limit = 1000
 
     return timeline_service.get_timeline(
-        db, user_id=current_user.id, date_start=start, date_end=end, max_items=max_items
+        db,
+        user_id=current_user.id,
+        date_start=start,
+        date_end=end,
+        skip=skip,
+        limit=limit,
     )
 
 

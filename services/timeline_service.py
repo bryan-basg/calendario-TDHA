@@ -18,14 +18,21 @@ def get_timeline(
     user_id: int,
     date_start: datetime,
     date_end: datetime,
-    max_items: int = 500,
+    skip: int = 0,
+    limit: int = 50,
 ):
     """
     Obtiene el timeline del usuario con eventos, tareas y festivos.
-
-    - max_items: límite máximo de items a devolver (default: 500)
+    Soporta paginación real filtrando por fecha y luego aplicando skip/limit.
     """
-    # 1. Obtener Eventos (limitados para performance)
+    # Calculamos un buffer seguro para DB queries
+    # Necesitamos traer suficientes items de CADA fuente para garantizar que tras el merge
+    # el slice [skip : skip + limit] sea correcto.
+    # Peor caso: Todos los items son de un solo tipo.
+    # Por tanto, traemos (skip + limit) de cada uno.
+    fetch_limit = skip + limit
+
+    # 1. Obtener Eventos
     events = (
         db.query(models.Event)
         .options(joinedload(models.Event.category))
@@ -34,11 +41,11 @@ def get_timeline(
             models.Event.start_time >= date_start,
             models.Event.start_time <= date_end,
         )
-        .limit(max_items)
+        .limit(fetch_limit)
         .all()
     )
 
-    # 2. Obtener Tareas "Agendadas" (Time Blocking) - limitadas para performance
+    # 2. Obtener Tareas "Agendadas"
     tasks = (
         db.query(models.Task)
         .filter(
@@ -46,7 +53,7 @@ def get_timeline(
             models.Task.planned_start >= date_start,
             models.Task.planned_start <= date_end,
         )
-        .limit(max_items)
+        .limit(fetch_limit)
         .all()
     )
 
@@ -83,42 +90,40 @@ def get_timeline(
             }
         )
 
-    # 4. Obtener Festivos del País
-    # El usuario debe tener un 'country' configurado. Por defecto es US si no existe.
-    # Necesitamos cargar el usuario primero para saber su pais, pero la funcion solo recibe user_id.
+    # 4. Obtener Festivos del País (Solo si estamos en la primera "página" o el rango es pequeño)
+    # Para simplificar la paginación con festivos (que son generados, no de BD),
+    # los generamos siempre en el rango, pero solo se mostrarán si caen en el slice final.
+    # Esto es barato computacionalmente.
+
     user = crud.get_user_by_id(db, user_id)
     country_code = user.country if user and hasattr(user, "country") else "US"
 
-    # Validar si el país está soportado por la librería holidays, si no, fallback a US
     try:
         user_holidays = holidays.country_holidays(country_code)
     except Exception:
         user_holidays = holidays.US()
 
-    # Iterar sobre los dias en el rango
-    # holidays library permite verificar 'date in holidays'
-    # Generamos los dias entre date_start y date_end
     current_itr = date_start.date()
     end_date_date = date_end.date()
 
     while current_itr <= end_date_date:
         if current_itr in user_holidays:
             holiday_name = user_holidays.get(current_itr)
-            # Crear evento de todo el día para el festivo
-            # Usar ID negativo para evitar colisión con DB IDs (hack simple)
-            # Ojo: Start debe ser datetime
-            h_start = datetime.combine(current_itr, datetime.min.time())
-            h_end = datetime.combine(current_itr, datetime.max.time())
+            h_start = datetime.combine(current_itr, datetime.min.time()).replace(
+                tzinfo=timezone.utc
+            )
+            h_end = datetime.combine(current_itr, datetime.max.time()).replace(
+                tzinfo=timezone.utc
+            )
 
             timeline.append(
                 {
-                    "id": -1
-                    * int(current_itr.strftime("%Y%m%d")),  # Pseudo ID único por fecha
+                    "id": -1 * int(current_itr.strftime("%Y%m%d")),
                     "title": f"🎉 {holiday_name}",
                     "start": h_start,
                     "end": h_end,
                     "type": "holiday",
-                    "color": "#e91e63",  # Pink/Magenta for holidays
+                    "color": "#e91e63",
                     "is_completed": False,
                 }
             )
@@ -126,7 +131,13 @@ def get_timeline(
 
     # 5. Ordenar por hora de inicio
     timeline.sort(key=lambda x: x["start"])
-    return timeline
+
+    # 6. Aplicar Paginación (Slice)
+    # [start : end]
+    # Si skip > len, devuelve []
+    paginated_timeline = timeline[skip : skip + limit]
+
+    return paginated_timeline
 
 
 def get_now_view(db: Session, user_id: int, current_time: datetime):

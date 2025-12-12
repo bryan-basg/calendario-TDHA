@@ -1,5 +1,6 @@
 // src/pages/CategoryForm.jsx
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createCategory, updateCategory, getCategory } from '../api';
@@ -36,13 +37,15 @@ const CategoryForm = () => {
         try {
             if (isEdit) {
                 await updateCategory(id, { name, color_hex: color });
+                toast.success(t('categories.updated_success', 'Categoría actualizada correctamente'));
             } else {
                 await createCategory({ name, color_hex: color });
+                toast.success(t('categories.created_success', 'Categoría creada correctamente'));
             }
             navigate('/categories');
         } catch (err) {
             console.error('Error saving category', err);
-            setError(t('categories.save_error', 'Error al guardar la categoría. Intenta de nuevo.'));
+            // Error toast handled by api interceptor
         }
     };
 

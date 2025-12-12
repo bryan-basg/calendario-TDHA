@@ -1,5 +1,6 @@
 // src/pages/TaskForm.jsx
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createTask, getTask, updateTask } from '../api';
@@ -49,13 +50,15 @@ const TaskForm = () => {
         try {
             if (isEdit) {
                 await updateTask(id, payload);
+                toast.success(t('tasks.updated_success', 'Tarea actualizada correctamente'));
             } else {
                 await createTask(payload);
+                toast.success(t('tasks.created_success', 'Tarea creada correctamente'));
             }
             navigate('/tasks');
         } catch (err) {
             console.error('Error saving task', err);
-            setError(t('tasks.save_error', 'Error al guardar la tarea'));
+            // Error toast handled by api interceptor
         }
     };
 
