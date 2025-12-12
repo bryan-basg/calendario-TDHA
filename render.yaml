@@ -21,7 +21,7 @@ services:
         value: "production"
 
   # Frontend Static Site
-  - type: static
+  - type: web
     name: calendario-tdha-web-prod
     env: static
     buildCommand: "cd frontend && npm install && npm run build"
