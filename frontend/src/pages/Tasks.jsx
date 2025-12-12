@@ -1,6 +1,7 @@
 // src/pages/Tasks.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getTasks, deleteTask, completeTask } from '../api';
 import './Tasks.css';
 
@@ -8,6 +9,7 @@ const Tasks = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -29,7 +31,7 @@ const Tasks = () => {
     }, []);
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Eliminar esta tarea?')) return;
+        if (!window.confirm(t('tasks.confirm_delete', '¿Eliminar esta tarea?'))) return;
         try {
             await deleteTask(id);
             setTasks(tasks.filter((t) => t.id !== id));
@@ -48,24 +50,24 @@ const Tasks = () => {
     };
 
     if (loading) {
-        return <div className="loading-state">Cargando tareas...</div>;
+        return <div className="loading-state">{t('common.loading', 'Cargando...')}</div>;
     }
 
     return (
         <div className="tasks-container">
             <header className="tasks-header">
-                <h2>Mis Tareas</h2>
+                <h2>{t('tasks.header', 'Mis Tareas')}</h2>
                 <button
                     className="btn btn-primary"
                     onClick={() => navigate('/tasks/new')}
                 >
-                    + Nueva Tarea
+                    {t('tasks.new_task', '+ Nueva Tarea')}
                 </button>
             </header>
 
             {tasks.length === 0 ? (
                 <div className="text-center" style={{ padding: '3rem', color: 'var(--text-secondary)' }}>
-                    <p>No tienes tareas pendientes. ¡Buen trabajo!</p>
+                    <p>{t('tasks.empty_state', 'No tienes tareas pendientes. ¡Buen trabajo!')}</p>
                 </div>
             ) : (
                 <ul className="tasks-list">
@@ -88,7 +90,7 @@ const Tasks = () => {
                                     {task.planned_start && (
                                         <div className="task-meta">
                                             <span className="task-date">
-                                                📅 {new Date(task.planned_start).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                                📅 {new Date(task.planned_start).toLocaleString(i18n.language, { dateStyle: 'short', timeStyle: 'short' })}
                                             </span>
                                         </div>
                                     )}
@@ -98,17 +100,25 @@ const Tasks = () => {
                             <div className="task-actions">
                                 <button
                                     className="btn btn-outline"
+                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', marginRight: '0.5rem' }}
+                                    onClick={() => navigate('/focus', { state: { taskId: task.id } })}
+                                    title={t('tasks.start_focus', 'Iniciar Modo Enfoque')}
+                                >
+                                    🎯
+                                </button>
+                                <button
+                                    className="btn btn-outline"
                                     style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                                     onClick={() => navigate(`/tasks/${task.id}/edit`)}
                                 >
-                                    Editar
+                                    {t('common.edit', 'Editar')}
                                 </button>
                                 <button
                                     className="btn btn-danger"
                                     style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                                     onClick={() => handleDelete(task.id)}
                                 >
-                                    Eliminar
+                                    {t('common.delete', 'Eliminar')}
                                 </button>
                             </div>
                         </li>

@@ -1,11 +1,13 @@
 // src/pages/Categories.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getCategories, deleteCategory } from '../api';
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const fetchCategories = async () => {
         try {
@@ -24,64 +26,57 @@ const Categories = () => {
     }, [navigate]);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("¿Seguro que quieres eliminar esta categoría?")) return;
+        if (!window.confirm(t('categories.confirm_delete_msg', "¿Seguro que quieres eliminar esta categoría?"))) return;
         try {
             await deleteCategory(id);
             setCategories(categories.filter(c => c.id !== id));
         } catch (err) {
             console.error("Error al eliminar categoría", err);
-            alert("No se pudo eliminar la categoría");
+            alert(t('categories.delete_error', "No se pudo eliminar la categoría"));
         }
     };
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2>Mis Categorías</h2>
+        <div className="container" style={{ padding: '2rem 0' }}>
+            <div className="flex justify-between items-center mb-4">
+                <h2>{t('categories.my_categories', "Mis Categorías")}</h2>
                 <button
                     onClick={() => navigate('/categories/new')}
-                    style={{ padding: '0.5rem 1rem', cursor: 'pointer', backgroundColor: '#2196f3', color: 'white', border: 'none', borderRadius: '4px' }}
+                    className="btn btn-primary"
                 >
-                    + Nueva Categoría
+                    {t('categories.new_category', "+ Nueva Categoría")}
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
                 {categories.map((cat) => (
                     <div
                         key={cat.id}
-                        style={{
-                            padding: '1.5rem',
-                            border: `2px solid ${cat.color_hex}`,
-                            borderRadius: '8px',
-                            backgroundColor: '#fff',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                            position: 'relative'
-                        }}
+                        className="card"
+                        style={{ borderTop: `4px solid ${cat.color_hex}` }}
                     >
-                        <div style={{ width: '100%', height: '20px', backgroundColor: cat.color_hex, marginBottom: '0.5rem', borderRadius: '4px' }}></div>
-                        <h3 style={{ margin: '0 0 1rem 0' }}>{cat.name}</h3>
+                        <h3 className="text-xl font-bold mb-2">{cat.name}</h3>
 
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div className="flex gap-2 mt-4">
                             <button
                                 onClick={() => navigate(`/categories/${cat.id}/edit`)}
-                                style={{ flex: 1, padding: '0.25rem', cursor: 'pointer', backgroundColor: '#eee', border: 'none', borderRadius: '4px' }}
+                                className="btn btn-outline flex-1"
                             >
-                                ✏ Editar
+                                ✏ {t('common.edit', "Editar")}
                             </button>
                             <button
                                 onClick={() => handleDelete(cat.id)}
-                                style={{ flex: 1, padding: '0.25rem', cursor: 'pointer', backgroundColor: '#ffebee', color: '#d32f2f', border: 'none', borderRadius: '4px' }}
+                                className="btn btn-danger flex-1"
                             >
-                                🗑 Borrar
+                                🗑 {t('common.delete', "Borrar")}
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div style={{ marginTop: '2rem' }}>
-                <Link to="/">Volver al Dashboard</Link>
+            <div className="mt-4">
+                <Link to="/" className="btn btn-outline">{t('categories.back_dashboard', "← Volver al Dashboard")}</Link>
             </div>
         </div>
     );

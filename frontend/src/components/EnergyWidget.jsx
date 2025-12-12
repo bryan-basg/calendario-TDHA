@@ -1,11 +1,14 @@
 // src/components/EnergyWidget.jsx
 import React, { useState } from 'react';
 import { getTaskSuggestions } from '../api';
+import { useTranslation } from 'react-i18next';
+import './EnergyWidget.css';
 
 const EnergyWidget = () => {
     const [energy, setEnergy] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const { t } = useTranslation();
 
     const handleEnergySelect = async (level) => {
         setEnergy(level);
@@ -21,46 +24,62 @@ const EnergyWidget = () => {
     };
 
     return (
-        <div style={{ padding: '1.5rem', border: '1px solid #ddd', borderRadius: '8px', marginTop: '2rem', backgroundColor: '#fff' }}>
-            <h3>🔋 ¿Cómo está tu energía ahora?</h3>
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="energy-widget">
+            <h3 className="energy-title">
+                {t('widgets.energy_title', '🔋 Nivel de Energía Actual')}
+            </h3>
+
+            <div className="energy-options">
                 <button
                     onClick={() => handleEnergySelect('high')}
-                    style={{ padding: '0.5rem 1rem', background: '#ff5252', color: 'white', border: 'none', borderRadius: '4px', opacity: energy === 'high' ? 1 : 0.7 }}
+                    className={`energy-btn high ${energy === 'high' ? 'selected' : ''}`}
                 >
-                    Alta 🔥
+                    <span className="energy-icon">🔥</span>
+                    <span>{t('widgets.high', 'Alta')}</span>
                 </button>
+
                 <button
                     onClick={() => handleEnergySelect('medium')}
-                    style={{ padding: '0.5rem 1rem', background: '#ffa726', color: 'white', border: 'none', borderRadius: '4px', opacity: energy === 'medium' ? 1 : 0.7 }}
+                    className={`energy-btn medium ${energy === 'medium' ? 'selected' : ''}`}
                 >
-                    Media 😐
+                    <span className="energy-icon">😐</span>
+                    <span>{t('widgets.medium', 'Media')}</span>
                 </button>
+
                 <button
                     onClick={() => handleEnergySelect('low')}
-                    style={{ padding: '0.5rem 1rem', background: '#66bb6a', color: 'white', border: 'none', borderRadius: '4px', opacity: energy === 'low' ? 1 : 0.7 }}
+                    className={`energy-btn low ${energy === 'low' ? 'selected' : ''}`}
                 >
-                    Baja 😴
+                    <span className="energy-icon">😴</span>
+                    <span>{t('widgets.low', 'Baja')}</span>
                 </button>
             </div>
 
-            {loading && <p>Buscando tareas adecuadas...</p>}
+            {loading && (
+                <div className="text-center text-secondary py-4">
+                    {t('widgets.searching', 'Buscando tareas compatibles...')}
+                </div>
+            )}
 
-            {suggestions.length > 0 && (
-                <div>
-                    <h4>Tareas Sugeridas:</h4>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
+            {!loading && suggestions.length > 0 && (
+                <div className="suggestions-container">
+                    <h4 className="suggestions-title">{t('widgets.suggested_tasks', 'Tareas Sugeridas')}</h4>
+                    <ul className="suggestion-list">
                         {suggestions.map(task => (
-                            <li key={task.id} style={{ padding: '0.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
-                                <span>{task.title}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#666' }}>{task.priority || 'Normal'}</span>
+                            <li key={task.id} className="suggestion-item">
+                                <span className="suggestion-title">{task.title}</span>
+                                <span className="suggestion-badge">{task.priority || 'Normal'}</span>
                             </li>
                         ))}
                     </ul>
                 </div>
             )}
+
             {!loading && energy && suggestions.length === 0 && (
-                <p>No se encontraron tareas específicas para este nivel de energía. ¡Eres libre!</p>
+                <div className="text-center text-secondary py-4 fade-in">
+                    <p>{t('widgets.no_tasks_msg', 'No hay tareas específicas para este nivel.')}</p>
+                    <p style={{ fontSize: '0.9em', marginTop: '0.5rem' }}>{t('widgets.enjoy_msg', '¡Disfruta tu tiempo libre! ✨')}</p>
+                </div>
             )}
         </div>
     );

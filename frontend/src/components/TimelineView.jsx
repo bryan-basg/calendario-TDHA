@@ -1,5 +1,6 @@
 // src/components/TimelineView.jsx
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getTimeline } from '../api';
 import './TimelineView.css';
 
@@ -7,6 +8,7 @@ const TimelineView = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [nowPosition, setNowPosition] = useState(0);
+    const { t } = useTranslation();
 
     // Configuración de la grilla
     const startHour = 6; // 6 AM
@@ -62,7 +64,7 @@ const TimelineView = () => {
         return Math.max(diffMinutes, 30); // Altura mínima 30px (30 min) para visibilidad
     };
 
-    if (loading) return <div className="timeline-loading">Cargando tu día...</div>;
+    if (loading) return <div className="timeline-loading">{t('widgets.loading_day', 'Cargando tu día...')}</div>;
 
     // Generar marcadores de hora
     const hourMarkers = [];
@@ -72,7 +74,7 @@ const TimelineView = () => {
 
     return (
         <div className="timeline-container">
-            <h3>📅 Tu Día Visual</h3>
+            <h3>{t('widgets.timeline_title', '📅 Tu Día Visual')}</h3>
             <div className="timeline-grid" style={{ height: totalHeight + 20 }}> {/* +padding */}
 
                 {/* Marcadores de hora y Grid Lines */}

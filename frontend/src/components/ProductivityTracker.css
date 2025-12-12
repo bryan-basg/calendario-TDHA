@@ -1,0 +1,95 @@
+.productivity-tracker {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    align-items: center;
+    border-left: 5px solid #6366f1;
+    /* Indigo accent */
+}
+
+.tracker-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tracker-section h3 {
+    margin: 0;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.timer-display {
+    font-size: 2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #1f2937;
+}
+
+.stats-grid {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.advice-text {
+    font-style: italic;
+    color: #4b5563;
+    line-height: 1.5;
+    font-size: 1rem;
+    border-left: 3px solid #fbbf24;
+    /* Amber accent for advice */
+    padding-left: 1rem;
+}
+
+.stat-value.completed {
+    color: #10b981;
+    /* Green */
+}
+
+.stat-value.incomplete {
+    color: #ef4444;
+    /* Red */
+}
+
+.focus-mode-btn {
+    background: #6366f1;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    grid-column: 1 / -1;
+    /* Span full width if grid */
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.focus-mode-btn:hover {
+    background: #4f46e5;
+}

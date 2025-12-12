@@ -1,12 +1,14 @@
 // src/pages/TaskForm.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { createTask, getTask, updateTask } from '../api';
 
 const TaskForm = () => {
     const navigate = useNavigate();
     const { id } = useParams(); // undefined for create, defined for edit
     const isEdit = Boolean(id);
+    const { t } = useTranslation();
 
     const [title, setTitle] = useState('');
     const [energy, setEnergy] = useState('low');
@@ -28,7 +30,7 @@ const TaskForm = () => {
                     setPlannedEnd(task.planned_end ? new Date(task.planned_end).toISOString().slice(0, 16) : '');
                 } catch (err) {
                     console.error('Error loading task', err);
-                    setError('No se pudo cargar la tarea');
+                    setError(t('tasks.fetch_error', 'No se pudo cargar la tarea'));
                 }
             })();
         }
@@ -53,49 +55,108 @@ const TaskForm = () => {
             navigate('/tasks');
         } catch (err) {
             console.error('Error saving task', err);
-            setError('Error al guardar la tarea');
+            setError(t('tasks.save_error', 'Error al guardar la tarea'));
         }
     };
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <h2>{isEdit ? 'Editar Tarea' : 'Crear Tarea'}</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="title">Título:</label><br />
-                    <label htmlFor="title">Título:</label><br />
-                    <input type="text" id="title" name="title" autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="energy">Energía requerida:</label><br />
-                    <select id="energy" name="energy" value={energy} onChange={(e) => setEnergy(e.target.value)}>
-                        <option value="low">Baja</option>
-                        <option value="medium">Media</option>
-                        <option value="high">Alta</option>
-                    </select>
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="deadline">Deadline (opcional):</label><br />
-                    <label htmlFor="deadline">Deadline (opcional):</label><br />
-                    <input type="datetime-local" id="deadline" name="deadline" autoComplete="off" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-                </div>
+        <div className="container" style={{ maxWidth: '600px', padding: '2rem 0' }}>
+            <h2 className="mb-4">{isEdit ? t('tasks.edit_title', 'Editar Tarea') : t('tasks.create_title', 'Crear Tarea')}</h2>
 
-                <h3 style={{ fontSize: '1rem', marginTop: '1.5rem' }}>📅 Time Blocking (Agendar en Calendario)</h3>
-                <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-                    <div>
-                        <label htmlFor="plannedStart">Inicio Planificado:</label><br />
-                        <label htmlFor="plannedStart">Inicio Planificado:</label><br />
-                        <input type="datetime-local" id="plannedStart" name="plannedStart" autoComplete="off" value={plannedStart} onChange={(e) => setPlannedStart(e.target.value)} />
-                    </div>
-                    <div>
-                        <label htmlFor="plannedEnd">Fin Planificado:</label><br />
-                        <label htmlFor="plannedEnd">Fin Planificado:</label><br />
-                        <input type="datetime-local" id="plannedEnd" name="plannedEnd" autoComplete="off" value={plannedEnd} onChange={(e) => setPlannedEnd(e.target.value)} />
-                    </div>
+            {error && (
+                <div style={{ padding: '1rem', background: '#fee2e2', color: '#c53030', marginBottom: '1rem', borderRadius: '4px' }}>
+                    {error}
                 </div>
-                <button type="submit">{isEdit ? 'Actualizar' : 'Crear'}</button>
-            </form>
+            )}
+
+            <div className="card">
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="title">{t('tasks.title_label', 'Título:')}</label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            autoComplete="off"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                            className="input-field"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="energy">{t('tasks.energy_label', 'Energía requerida:')}</label>
+                        <select
+                            id="energy"
+                            name="energy"
+                            value={energy}
+                            onChange={(e) => setEnergy(e.target.value)}
+                            className="input-field"
+                        >
+                            <option value="low">{t('widgets.low', 'Baja')}</option>
+                            <option value="medium">{t('widgets.medium', 'Media')}</option>
+                            <option value="high">{t('widgets.high', 'Alta')}</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="deadline">{t('tasks.deadline_label', 'Deadline (opcional):')}</label>
+                        <input
+                            type="datetime-local"
+                            id="deadline"
+                            name="deadline"
+                            autoComplete="off"
+                            value={deadline}
+                            onChange={(e) => setDeadline(e.target.value)}
+                            className="input-field"
+                        />
+                    </div>
+
+                    <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--neutral-200)' }}>
+                        <h3 className="text-lg font-bold mb-4">{t('tasks.time_blocking_title', '📅 Time Blocking (Agendar en Calendario)')}</h3>
+                        <div className="flex gap-4 mb-4">
+                            <div className="form-group flex-1">
+                                <label className="form-label" htmlFor="plannedStart">{t('tasks.planned_start_label', 'Inicio Planificado:')}</label>
+                                <input
+                                    type="datetime-local"
+                                    id="plannedStart"
+                                    name="plannedStart"
+                                    autoComplete="off"
+                                    value={plannedStart}
+                                    onChange={(e) => setPlannedStart(e.target.value)}
+                                    className="input-field"
+                                />
+                            </div>
+                            <div className="form-group flex-1">
+                                <label className="form-label" htmlFor="plannedEnd">{t('tasks.planned_end_label', 'Fin Planificado:')}</label>
+                                <input
+                                    type="datetime-local"
+                                    id="plannedEnd"
+                                    name="plannedEnd"
+                                    autoComplete="off"
+                                    value={plannedEnd}
+                                    onChange={(e) => setPlannedEnd(e.target.value)}
+                                    className="input-field"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/tasks')}
+                            className="btn btn-outline"
+                        >
+                            {t('common.cancel', 'Cancelar')}
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                            {isEdit ? t('categories.update_btn', 'Actualizar') : t('common.save', 'Crear')}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };

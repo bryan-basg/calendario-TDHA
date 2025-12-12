@@ -1,0 +1,148 @@
+/* src/components/EnergyWidget.css */
+
+.energy-widget {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--neutral-100);
+    transition: box-shadow 0.3s ease;
+    margin-top: var(--space-md);
+}
+
+.energy-widget:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.energy-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--neutral-800);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.energy-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.energy-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    cursor: pointer;
+    background-color: var(--neutral-50);
+    color: var(--text-secondary);
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.energy-btn:hover {
+    background-color: var(--neutral-100);
+    transform: translateY(-2px);
+}
+
+.energy-btn.selected {
+    background-color: white;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Variant Specifics */
+.energy-btn.high.selected {
+    border-color: var(--danger);
+    color: var(--danger);
+    background-color: #fef2f2;
+}
+
+.energy-btn.medium.selected {
+    border-color: var(--warning);
+    color: var(--warning);
+    background-color: #fffbeb;
+}
+
+.energy-btn.low.selected {
+    border-color: var(--success);
+    color: var(--success);
+    background-color: #f0fdf4;
+}
+
+.energy-icon {
+    font-size: 1.5rem;
+}
+
+.suggestions-container {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.suggestions-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-sm);
+}
+
+.suggestion-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.suggestion-item {
+    background-color: var(--neutral-50);
+    border: 1px solid var(--neutral-100);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.suggestion-item:hover {
+    transform: translateX(4px);
+    background-color: white;
+    border-color: var(--neutral-300);
+}
+
+.suggestion-title {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.suggestion-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background-color: var(--neutral-200);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

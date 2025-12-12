@@ -1,6 +1,7 @@
 // src/components/RegisterForm.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { register, login } from '../api';
 import './Auth.css';
 
@@ -11,13 +12,14 @@ const RegisterForm = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
         if (password !== confirmPassword) {
-            setError('Las contraseñas no coinciden');
+            setError(t('auth.passwords_mismatch', 'Las contraseñas no coinciden'));
             return;
         }
 
@@ -32,7 +34,7 @@ const RegisterForm = () => {
             if (err.response && err.response.data && err.response.data.detail) {
                 setError(err.response.data.detail);
             } else {
-                setError('Error al registrar usuario');
+                setError(t('auth.registration_error', 'Error al registrar usuario'));
             }
         } finally {
             setLoading(false);
@@ -42,8 +44,8 @@ const RegisterForm = () => {
     return (
         <div className="auth-container">
             <div className="auth-header">
-                <h2>Crear Cuenta</h2>
-                <p>Únete para organizar tu tiempo</p>
+                <h2>{t('auth.create_account', 'Crear Cuenta')}</h2>
+                <p>{t('auth.join_us', 'Únete para organizar tu tiempo')}</p>
             </div>
 
             {error && (
@@ -54,7 +56,7 @@ const RegisterForm = () => {
 
             <form onSubmit={handleSubmit} className="auth-form">
                 <div className="form-group">
-                    <label htmlFor="email" className="form-label">Correo electrónico</label>
+                    <label htmlFor="email" className="form-label">{t('auth.email', 'Correo electrónico')}</label>
                     <input
                         type="email"
                         id="email"
@@ -67,7 +69,7 @@ const RegisterForm = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="password" className="form-label">Contraseña</label>
+                    <label htmlFor="password" className="form-label">{t('auth.password', 'Contraseña')}</label>
                     <input
                         type="password"
                         id="password"
@@ -80,7 +82,7 @@ const RegisterForm = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="confirmPassword" className="form-label">Confirmar Contraseña</label>
+                    <label htmlFor="confirmPassword" className="form-label">{t('auth.confirm_password', 'Confirmar Contraseña')}</label>
                     <input
                         type="password"
                         id="confirmPassword"
@@ -97,11 +99,11 @@ const RegisterForm = () => {
                     className="btn btn-primary w-full"
                     disabled={loading}
                 >
-                    {loading ? 'Registrando...' : 'Registrarse'}
+                    {loading ? t('auth.registering', 'Registrando...') : t('auth.register_button', 'Registrarse')}
                 </button>
             </form>
             <div className="auth-footer">
-                ¿Ya tienes cuenta? <span onClick={() => navigate('/login')} style={{ cursor: 'pointer' }} ><a href="/login" onClick={(e) => e.preventDefault()}>Inicia sesión</a></span>
+                {t('auth.have_account', '¿Ya tienes cuenta?')} <span onClick={() => navigate('/login')} style={{ cursor: 'pointer' }} ><a href="/login" onClick={(e) => e.preventDefault()}>{t('auth.login_here', 'Inicia sesión')}</a></span>
             </div>
         </div>
     );

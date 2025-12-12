@@ -1,23 +1,28 @@
-import requests
-import time
 import random
 import string
+import time
+
+import requests
 
 BASE_URL = "http://localhost:8000"
 
+
 def get_random_string(length=10):
-    return ''.join(random.choice(string.ascii_letters) for i in range(length))
+    return "".join(random.choice(string.ascii_letters) for i in range(length))
+
 
 def run_tests():
     print("--- Starting Integration Tests ---")
-    
+
     # 1. Register
     email = f"test_{get_random_string()}@example.com"
     password = "password123"
     print(f"\n1. Registering user: {email}")
-    
+
     try:
-        resp = requests.post(f"{BASE_URL}/users/", json={"email": email, "password": password})
+        resp = requests.post(
+            f"{BASE_URL}/users/", json={"email": email, "password": password}
+        )
         if resp.status_code == 201:
             print("   [PASS] User created successfully")
         else:
@@ -30,7 +35,9 @@ def run_tests():
     # 2. Login
     print(f"\n2. Logging in")
     try:
-        resp = requests.post(f"{BASE_URL}/token", data={"username": email, "password": password})
+        resp = requests.post(
+            f"{BASE_URL}/token", data={"username": email, "password": password}
+        )
         if resp.status_code == 200:
             token_data = resp.json()
             token = token_data["access_token"]
@@ -51,9 +58,9 @@ def run_tests():
         "title": task_title,
         "description": "Test description",
         "energy_level": "medium",
-        "is_urgent": False
+        "is_urgent": False,
     }
-    
+
     resp = requests.post(f"{BASE_URL}/tasks/", json=task_data, headers=headers)
     if resp.status_code == 201:
         task = resp.json()
@@ -67,7 +74,7 @@ def run_tests():
     resp = requests.get(f"{BASE_URL}/tasks/", headers=headers)
     if resp.status_code == 200:
         tasks = resp.json()
-        found = any(t['id'] == task['id'] for t in tasks)
+        found = any(t["id"] == task["id"] for t in tasks)
         if found:
             print(f"   [PASS] Task {task['id']} found in list.")
         else:
@@ -77,11 +84,13 @@ def run_tests():
 
     print("\n--- Integration Tests Completed Successfully ---")
 
+
 if __name__ == "__main__":
     try:
         run_tests()
     except ImportError:
         print("requests library not found. Installing...")
         import os
+
         os.system("pip install requests")
         run_tests()

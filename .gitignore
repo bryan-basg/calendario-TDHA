@@ -1,10 +1,79 @@
+# Archivos temporales y de debug
+*.log
+*.txt
+!requirements.txt
+!README.txt
+*.db
+!calendario.db
 
-node_modules/
-frontend/node_modules/
-dist/
+# Archivos de debug específicos
+debug_*.py
+debug_*.txt
+test_*.db
+*_output.txt
+*_report.txt
+*_error*.txt
+verify_*.py
+crear_*.py
+create_*.py
+nuke_*.py
+seed_*.py
+reproduce_*.py
+list_*.py
+inspect_*.py
+init_*.py
+verify_*.txt
+token.txt
+edge_cases_*.txt
+
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.db
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 .venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.mypy_cache/
+
+# Environment
 .env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+node_modules/
+frontend/node_modules/
+frontend/dist/

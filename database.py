@@ -1,11 +1,14 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-
+import logging
 import os
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv(override=True)
-print(f"DEBUG: DATABASE_URL loaded: {os.getenv('DATABASE_URL')}")
+
+logger = logging.getLogger(__name__)
+logger.debug(f"DATABASE_URL loaded: {os.getenv('DATABASE_URL')}")
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./calendario.db")
 

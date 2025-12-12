@@ -1,177 +1,173 @@
-// src/pages/FocusMode.jsx
 import React, { useState, useEffect } from 'react';
-import { getTaskSuggestions, completeTask } from '../api';
-// import confetti from 'canvas-confetti'; // Optional: for celebration (would need install), but we can do simple CSS for now
+import { useLocation } from 'react-router-dom';
+import { startFocusSession, stopFocusSession, pauseFocusSession, resumeFocusSession, logInterruption, getTasks, getFocusStats, getCurrentFocusSession } from '../api';
+import FocusTimer from '../components/focus/FocusTimer';
+import './FocusMode.css';
 
 const FocusMode = () => {
-    const [step, setStep] = useState('energy'); // energy, focus, empty
-    const [currentTask, setCurrentTask] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
-    const [isActive, setIsActive] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const location = useLocation();
+    const [session, setSession] = useState(null);
+    const [tasks, setTasks] = useState([]);
+    const [selectedTask, setSelectedTask] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState(null);
 
-    // Timer logic
     useEffect(() => {
-        let interval = null;
-        if (isActive && timeLeft > 0) {
-            interval = setInterval(() => {
-                setTimeLeft(timeLeft => timeLeft - 1);
-            }, 1000);
-        } else if (timeLeft === 0) {
-            setIsActive(false);
-            // Play sound?
+        loadData();
+    }, []);
+
+    useEffect(() => {
+        if (location.state?.taskId && tasks.length > 0) {
+            // Ensure type match if needed, but usually select handles values
+            setSelectedTask(location.state.taskId);
         }
-        return () => clearInterval(interval);
-    }, [isActive, timeLeft]);
+    }, [tasks, location.state]);
 
-    const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
 
-    const handleEnergySelect = async (level) => {
-        setLoading(true);
+    const loadData = async () => {
         try {
-            const suggestions = await getTaskSuggestions(level);
-            if (suggestions.length > 0) {
-                setCurrentTask(suggestions[0]); // Pick the top one
-                setStep('focus');
-                setTimeLeft(25 * 60); // Reset timer
-            } else {
-                setStep('empty');
+            const [tasksData, statsData, currentSession] = await Promise.all([
+                getTasks(),
+                getFocusStats(),
+                getCurrentFocusSession()
+            ]);
+            // Filter only pending tasks?
+            setTasks(tasksData.filter(t => !t.is_completed));
+            setStats(statsData);
+
+            if (currentSession) {
+                setSession(currentSession);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error("Error loading focus data", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleComplete = async () => {
-        if (!currentTask) return;
+    const handleStart = async () => {
         try {
-            await completeTask(currentTask.id);
-            // Celebration!
-            alert("¡Excelente trabajo! Tarea completada 🎉");
-            handleSkip(); // Look for next one or go back
-        } catch (err) {
-            console.error(err);
+            const newSession = await startFocusSession(selectedTask ? parseInt(selectedTask) : null);
+            setSession(newSession);
+        } catch (error) {
+            if (error.response && error.response.data.detail) {
+                alert(error.response.data.detail);
+            } else {
+                console.error("Failed to start", error);
+            }
         }
     };
 
-    const handleSkip = () => {
-        // Simple "Skip" logic: For now, just go back to energy selection to pick again
-        // Ideally we would fetch the next one from the previous list, but keeps it simple.
-        setStep('energy');
-        setIsActive(false);
+    const handleStop = async () => {
+        if (!session) return;
+
+        // Ask for feedback
+        const score = prompt("¿Qué tal fue tu sesión? (1-5)");
+
+        // Ask if task was completed (if attached to a task)
+        let completed = false;
+        if (session.task_id) {
+            completed = window.confirm("¿Completaste la tarea en la que estabas trabajando?");
+        }
+
+        try {
+            await stopFocusSession(session.id, score ? parseInt(score) : null, completed);
+            setSession(null);
+            loadData(); // Refresh stats and tasks list
+        } catch (error) {
+            console.error("Failed to stop", error);
+        }
     };
 
-    if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>🔄 Cargando tu misión...</div>;
+    const handlePause = async () => {
+        if (!session) return;
+        try {
+            const updated = await pauseFocusSession(session.id);
+            setSession(updated);
+        } catch (error) {
+            console.error("Failed to pause", error);
+        }
+    };
 
-    if (step === 'empty') return (
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-            <h2>¡Todo limpio!</h2>
-            <p>No hay tareas sugeridas para este nivel de energía. ¡Eres libre!</p>
-            <button onClick={() => setStep('energy')} style={styles.buttonSecondary}>Volver</button>
-        </div>
-    );
+    const handleResume = async () => {
+        if (!session) return;
+        try {
+            const updated = await resumeFocusSession(session.id);
+            setSession(updated);
+        } catch (error) {
+            console.error("Failed to resume", error);
+        }
+    };
 
-    if (step === 'energy') return (
-        <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-            <h1>🎯 Modo Enfoque</h1>
-            <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>Para empezar, dinos cómo te sientes ahora:</p>
+    const handleInterrupt = async () => {
+        if (!session) return;
+        const reason = prompt("Razón de interrupción (opcional):");
+        try {
+            // Optimistic update of simple counter if we wanted
+            await logInterruption(session.id, reason);
+            // Ideally re-fetch session to get accurate count, but we can just ignore visual update for now
+        } catch (error) {
+            console.error("Failed to log interruption", error);
+        }
+    };
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button onClick={() => handleEnergySelect('high')} style={{ ...styles.energyBtn, backgroundColor: '#ff5252' }}>
-                    🔥 Alta Energía (¡A por todas!)
-                </button>
-                <button onClick={() => handleEnergySelect('medium')} style={{ ...styles.energyBtn, backgroundColor: '#ffa726' }}>
-                    😐 Me siento normal
-                </button>
-                <button onClick={() => handleEnergySelect('low')} style={{ ...styles.energyBtn, backgroundColor: '#66bb6a' }}>
-                    😴 Baja Energía (Algo tranqui)
-                </button>
-            </div>
-        </div>
-    );
+    // Find task title
+    const currentTaskTitle = session && session.task_id
+        ? tasks.find(t => t.id === session.task_id)?.title
+        : "Enfoque Libre";
 
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '80vh',
-            textAlign: 'center',
-            padding: '1rem'
-        }}>
-            <h3 style={{ color: '#888', textTransform: 'uppercase', letterSpacing: '1px' }}>Tu Objetivo Ahora</h3>
-
-            <div style={{
-                fontSize: '2.5rem',
-                fontWeight: 'bold',
-                margin: '1rem 0 3rem 0',
-                padding: '1rem',
-                borderBottom: '2px solid #eee'
-            }}>
-                {currentTask.title}
+        <div className="focus-page">
+            <div className="focus-header">
+                <h1>Modo Enfoque 🧠</h1>
+                {stats && <p>Hoy: {stats.total_minutes} mins dedicados</p>}
             </div>
 
-            <div style={{ fontSize: '6rem', fontFamily: 'monospace', fontWeight: 'bold', color: isActive ? '#333' : '#aaa' }}>
-                {formatTime(timeLeft)}
-            </div>
+            {session ? (
+                <div className="focus-session-active">
+                    <div className="focus-current-task">
+                        Enfocándote en: <strong>{currentTaskTitle}</strong>
+                    </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button
-                    onClick={() => setIsActive(!isActive)}
-                    style={{ ...styles.buttonBig, backgroundColor: isActive ? '#f44336' : '#2196f3' }}
-                >
-                    {isActive ? '⏸ Pausar' : '▶ Iniciar Focus'}
-                </button>
-            </div>
+                    <FocusTimer
+                        startTime={session.start_time}
+                        status={session.status}
+                    />
 
-            <div style={{ marginTop: '3rem', display: 'flex', gap: '2rem' }}>
-                <button onClick={handleComplete} style={styles.buttonAction}>✅ Completar</button>
-                <button onClick={handleSkip} style={{ ...styles.buttonAction, backgroundColor: '#ccc', color: '#333' }}>⏭ Saltar</button>
-            </div>
+                    <div className="focus-controls">
+                        {session.status === 'active' ? (
+                            <button className="focus-btn focus-btn-pause" onClick={handlePause}>⏸ Pausar</button>
+                        ) : (
+                            <button className="focus-btn focus-btn-resume" onClick={handleResume}>▶ Reanudar</button>
+                        )}
+                        <button className="focus-btn focus-btn-stop" onClick={handleStop}>⏹ Terminar</button>
+                    </div>
+
+                    <button className="focus-btn focus-btn-interrupt" onClick={handleInterrupt}>
+                        🚨 Registrar Interrupción
+                    </button>
+                </div>
+            ) : (
+                <div className="focus-task-selector">
+                    <h2>¿En qué quieres trabajar?</h2>
+                    <select
+                        className="focus-task-select"
+                        value={selectedTask}
+                        onChange={(e) => setSelectedTask(e.target.value)}
+                    >
+                        <option value="">-- Enfoque Libre (Sin Tarea) --</option>
+                        {tasks.map(t => (
+                            <option key={t.id} value={t.id}>{t.title} ({t.energy_required})</option>
+                        ))}
+                    </select>
+
+                    <button className="focus-start-btn" onClick={handleStart}>
+                        🚀 Comenzar Enfoque
+                    </button>
+                </div>
+            )}
         </div>
     );
-};
-
-const styles = {
-    energyBtn: {
-        padding: '1.5rem',
-        fontSize: '1.2rem',
-        color: 'white',
-        border: 'none',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        transition: 'transform 0.2s',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-    },
-    buttonBig: {
-        padding: '1rem 3rem',
-        fontSize: '1.5rem',
-        color: 'white',
-        border: 'none',
-        borderRadius: '50px',
-        cursor: 'pointer',
-    },
-    buttonAction: {
-        padding: '0.8rem 2rem',
-        fontSize: '1rem',
-        backgroundColor: '#4CAF50',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: 'pointer'
-    },
-    buttonSecondary: {
-        padding: '0.5rem 1rem',
-        cursor: 'pointer',
-        marginTop: '1rem'
-    }
 };
 
 export default FocusMode;

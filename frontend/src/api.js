@@ -15,6 +15,17 @@ api.interceptors.request.use((config) => {
     return config;
 }, (error) => Promise.reject(error));
 
+// Response interceptor to handle 401s
+api.interceptors.response.use((response) => response, (error) => {
+    if (error.response && error.response.status === 401) {
+        localStorage.removeItem('access_token');
+        if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+        }
+    }
+    return Promise.reject(error);
+});
+
 // Exported API functions
 export const login = async (email, password) => {
     const response = await api.post('/token', new URLSearchParams({ username: email, password }));
@@ -28,6 +39,11 @@ export const register = async (email, password) => {
 
 export const getTasks = async () => {
     const response = await api.get('/tasks/');
+    return response.data;
+};
+
+export const getTaskStats = async () => {
+    const response = await api.get('/tasks/stats');
     return response.data;
 };
 
@@ -62,7 +78,7 @@ export const getCategories = async () => {
 
 export const getCategory = async (categoryId) => {
     const response = await api.get(`/categories/${categoryId}`); // Backend endpoint needs to support this if strictly necessary, or we can find from list. But detailed GET is better practice. Wait, backend DOES have get_category internal function but router only exposed list.
-    // Actually, looking at router `routers/categories.py`, I only added PUT and DELETE. I did NOT add GET /{id}. 
+    // Actually, looking at router `routers/categories.py`, I only added PUT and DELETE. I did NOT add GET /{id}.
     // I need to add GET /{id} to backend first if I want to use it here.
     // OR I can pass the category object via React Router state (simpler).
     // Let's stick to adding GET /{id} to backend for completeness.
@@ -124,6 +140,65 @@ export const getNowView = async () => {
 
 export const getTaskSuggestions = async (energyLevel) => {
     const response = await api.get(`/tasks/suggestions?energy=${energyLevel}`);
+    return response.data;
+};
+
+export const subscribeToPush = async (subscription) => {
+    try {
+        const response = await api.post('/notifications/subscribe', subscription);
+        return response.data;
+    } catch (error) {
+        console.error("Error subscribing to push:", error);
+        return null; // Fail silently
+    }
+};
+
+// Focus Mode APIs
+
+export const startFocusSession = async (taskId = null) => {
+    const response = await api.post('/focus/start', { task_id: taskId });
+    return response.data;
+};
+
+export const getCurrentFocusSession = async () => {
+    try {
+        const response = await api.get('/focus/current');
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            return null; // No active session
+        }
+        throw error;
+    }
+};
+
+export const stopFocusSession = async (sessionId, feedbackScore = null, completeTask = false) => {
+    const params = {};
+    if (feedbackScore) params.feedback_score = feedbackScore;
+    if (completeTask) params.complete_task = true;
+    const response = await api.post(`/focus/${sessionId}/stop`, null, { params });
+    return response.data;
+};
+
+export const pauseFocusSession = async (sessionId) => {
+    const response = await api.post(`/focus/${sessionId}/pause`);
+    return response.data;
+};
+
+export const resumeFocusSession = async (sessionId) => {
+    const response = await api.post(`/focus/${sessionId}/resume`);
+    return response.data;
+};
+
+export const logInterruption = async (sessionId, note = null) => {
+    const params = {};
+    if (note) params.note = note;
+    const response = await api.post(`/focus/${sessionId}/interruption`, null, { params });
+    return response.data;
+};
+
+export const getFocusStats = async () => {
+    const response = await api.get('/focus/stats');
     return response.data;
 };
 

@@ -1,7 +1,7 @@
 // src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import Navbar from './Navbar';
+import GlobalSidebar from './GlobalSidebar';
 
 // This component protects routes that require authentication.
 // If a valid JWT token exists in localStorage, it renders the child component.
@@ -13,12 +13,12 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/login" replace />;
     }
     return (
-        <>
-            <Navbar />
-            <div style={{ padding: '0' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+            <GlobalSidebar />
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
                 {children}
             </div>
-        </>
+        </div>
     );
 };
 

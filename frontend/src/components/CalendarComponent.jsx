@@ -1,5 +1,6 @@
 // src/components/CalendarComponent.jsx
 
+import { useTranslation } from 'react-i18next';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -10,24 +11,24 @@ import CustomToolbar from './CustomToolbar';
 // to the correct localizer.
 const localizer = momentLocalizer(moment);
 
-// Mapeo de mensajes al español
-const messages = {
-    allDay: 'Todo el día',
-    previous: 'Anterior',
-    next: 'Siguiente',
-    today: 'Hoy',
-    month: 'Mes',
-    week: 'Semana',
-    day: 'Día',
-    agenda: 'Agenda',
-    date: 'Fecha',
-    time: 'Hora',
-    event: 'Evento',
-    noEventsInRange: 'Sin eventos en este rango',
-    showMore: total => `+ Ver más (${total})`
-};
-
 const CalendarComponent = ({ events, onSelectEvent, onSelectSlot, date, view, onNavigate, onView }) => {
+    const { t } = useTranslation();
+
+    const messages = {
+        allDay: t('calendar.allDay'),
+        previous: t('calendar.previous'),
+        next: t('calendar.next'),
+        today: t('calendar.today'),
+        month: t('calendar.month'),
+        week: t('calendar.week'),
+        day: t('calendar.day'),
+        agenda: t('calendar.agenda'),
+        date: t('calendar.date'),
+        time: t('calendar.time'),
+        event: t('calendar.event'),
+        noEventsInRange: t('calendar.noEventsInRange'),
+        showMore: total => `+ ${t('calendar.showMore')} (${total})`
+    };
 
     // Custom Event Styling
     const eventStyleGetter = (event, start, end, isSelected) => {

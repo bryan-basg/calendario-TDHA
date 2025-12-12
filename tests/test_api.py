@@ -1,6 +1,8 @@
-import pytest
-from datetime import datetime, timedelta
 import time
+from datetime import datetime, timedelta, timezone
+
+import pytest
+
 
 @pytest.mark.asyncio
 async def test_full_integration_flow(client):
@@ -12,7 +14,9 @@ async def test_full_integration_flow(client):
     assert response.status_code == 201, f"Registro fallido: {response.text}"
 
     # B) Login (Obtener Token)
-    response = await client.post("/token", data={"username": email, "password": password})
+    response = await client.post(
+        "/token", data={"username": email, "password": password}
+    )
     assert response.status_code == 200
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -27,7 +31,7 @@ async def test_full_integration_flow(client):
     task_data = {
         "title": "Pytest Task",
         "energy_required": "high",
-        "deadline": "2025-12-31T23:59:59"
+        "deadline": "2025-12-31T23:59:59Z",
     }
     response = await client.post("/tasks/", json=task_data, headers=headers)
     assert response.status_code == 201
@@ -35,9 +39,9 @@ async def test_full_integration_flow(client):
     # E) Crear Evento
     event_data = {
         "title": "Pytest Event",
-        "start_time": "2025-12-10T10:00:00",
-        "end_time": "2025-12-10T11:00:00",
-        "category_id": category_id
+        "start_time": "2025-12-10T10:00:00Z",
+        "end_time": "2025-12-10T11:00:00Z",
+        "category_id": category_id,
     }
     response = await client.post("/events/", json=event_data, headers=headers)
     assert response.status_code == 201
@@ -62,8 +66,8 @@ async def test_full_integration_flow(client):
     tb_task_data = {
         "title": "Blocked Pytest Task",
         "energy_required": "low",
-        "planned_start": datetime.now().isoformat(),
-        "planned_end": (datetime.now() + timedelta(hours=1)).isoformat()
+        "planned_start": datetime.now(timezone.utc).isoformat(),
+        "planned_end": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
     }
     response = await client.post("/tasks/", json=tb_task_data, headers=headers)
     assert response.status_code == 201
@@ -82,6 +86,7 @@ async def test_full_integration_flow(client):
     assert "next" in now_data
 
     # I) Prueba Priorización
-    resp_suggestions = await client.get("/tasks/suggestions?energy=low", headers=headers)
+    resp_suggestions = await client.get(
+        "/tasks/suggestions?energy=low", headers=headers
+    )
     assert resp_suggestions.status_code == 200
-

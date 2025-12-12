@@ -1,6 +1,7 @@
 // src/components/LoginForm.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { login } from '../api';
 import './Auth.css';
 
@@ -10,6 +11,7 @@ const LoginForm = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,7 +23,7 @@ const LoginForm = () => {
             navigate('/');
         } catch (err) {
             console.error('Login error:', err);
-            setError('Credenciales incorrectas o error del servidor');
+            setError(t('auth.login_error', 'Credenciales incorrectas o error del servidor'));
         } finally {
             setLoading(false);
         }
@@ -30,8 +32,8 @@ const LoginForm = () => {
     return (
         <div className="auth-container">
             <div className="auth-header">
-                <h2>Bienvenido de nuevo</h2>
-                <p>Ingresa tus credenciales para continuar</p>
+                <h2>{t('auth.welcome_back', 'Bienvenido de nuevo')}</h2>
+                <p>{t('auth.enter_credentials', 'Ingresa tus credenciales para continuar')}</p>
             </div>
 
             {error && (
@@ -42,7 +44,7 @@ const LoginForm = () => {
 
             <form onSubmit={handleSubmit} className="auth-form">
                 <div className="form-group">
-                    <label htmlFor="email" className="form-label">Correo electrónico</label>
+                    <label htmlFor="email" className="form-label">{t('auth.email', 'Correo electrónico')}</label>
                     <input
                         type="email"
                         id="email"
@@ -55,7 +57,7 @@ const LoginForm = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="password" className="form-label">Contraseña</label>
+                    <label htmlFor="password" className="form-label">{t('auth.password', 'Contraseña')}</label>
                     <input
                         type="password"
                         id="password"
@@ -72,11 +74,11 @@ const LoginForm = () => {
                     className="btn btn-primary w-full"
                     disabled={loading}
                 >
-                    {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                    {loading ? t('auth.logging_in', 'Iniciando sesión...') : t('auth.login_button', 'Iniciar Sesión')}
                 </button>
             </form>
             <div className="auth-footer">
-                ¿No tienes cuenta? <span onClick={() => navigate('/register')} style={{ cursor: 'pointer' }} ><a href="/register" onClick={(e) => e.preventDefault()}>Regístrate aquí</a></span>
+                {t('auth.no_account', '¿No tienes cuenta?')} <span onClick={() => navigate('/register')} style={{ cursor: 'pointer' }} ><a href="/register" onClick={(e) => e.preventDefault()}>{t('auth.register_here', 'Regístrate aquí')}</a></span>
             </div>
         </div>
     );

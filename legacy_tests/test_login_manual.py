@@ -1,8 +1,9 @@
 import requests
 
+
 def test_login():
     base_url = "http://127.0.0.1:8000"
-    
+
     # 1. Crear usuario de prueba
     user_data = {"email": "test_jwt@example.com", "password": "securepassword123"}
     try:
@@ -19,10 +20,10 @@ def test_login():
 
     # 2. Intentar Login
     login_data = {
-        "username": "test_jwt@example.com", # OAuth2 usa 'username' aunque sea email
-        "password": "securepassword123"
+        "username": "test_jwt@example.com",  # OAuth2 usa 'username' aunque sea email
+        "password": "securepassword123",
     }
-    
+
     try:
         r = requests.post(f"{base_url}/token", data=login_data)
         if r.status_code == 200:
@@ -33,7 +34,8 @@ def test_login():
         else:
             print(f"\nFallo en el login: {r.status_code} - {r.text}")
     except Exception as e:
-         print(f"No se pudo conectar para login: {e}")
+        print(f"No se pudo conectar para login: {e}")
+
 
 if __name__ == "__main__":
     test_login()

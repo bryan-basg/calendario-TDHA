@@ -1,6 +1,8 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import List, Optional
+import re
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 # --- 1. Enums (Para que coincidan con models.py) ---
 from models import EnergyLevel
@@ -10,6 +12,15 @@ from models import EnergyLevel
 class CategoryBase(BaseModel):
     name: str = Field(..., min_length=1)
     color_hex: Optional[str] = "#50C878"
+
+    @field_validator("color_hex")
+    @classmethod
+    def validate_color(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        if not re.match(r"^#(?:[0-9a-fA-F]{3}){1,2}$", v):
+            raise ValueError("Invalid hex color format")
+        return v
 
 
 class CategoryCreate(CategoryBase):
@@ -46,6 +57,13 @@ class TaskBase(BaseModel):
     deadline: Optional[datetime] = None
     planned_start: Optional[datetime] = None
     planned_end: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def validate_dates(self) -> "TaskBase":
+        if self.planned_start and self.planned_end:
+            if self.planned_end < self.planned_start:
+                raise ValueError("planned_end must be after planned_start")
+        return self
 
 
 class TaskCreate(TaskBase):
@@ -98,6 +116,12 @@ class EventBase(BaseModel):
     start_time: datetime
     end_time: datetime
 
+    @model_validator(mode="after")
+    def validate_times(self) -> "EventBase":
+        if self.end_time < self.start_time:
+            raise ValueError("end_time must be after start_time")
+        return self
+
 
 class EventCreate(EventBase):
     category_id: int  # Necesitamos saber de qué categoría es
@@ -135,6 +159,8 @@ class User(UserBase):
     is_active: bool = True
     country: str = "US"
     tasks: List[Task] = []  # Para ver sus tareas anidadas
+
+
 class User(UserBase):
     id: int
     is_active: bool = True
@@ -145,7 +171,66 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+
 class UserUpdate(BaseModel):
     country: Optional[str] = None
     # Add other fields as needed
 
+
+# --- 6. PUSH NOTIFICATIONS ---
+class PushSubscriptionBase(BaseModel):
+    endpoint: str
+    keys: str  # JSON string {"p256dh": "...", "auth": "..."}
+    platform: Optional[str] = "web"
+
+
+class PushSubscriptionCreate(PushSubscriptionBase):
+    pass
+
+
+class PushSubscription(PushSubscriptionBase):
+    id: int
+    user_id: int
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- 7. FOCUS SESSION SCHEMAS ---
+class FocusSessionBase(BaseModel):
+    task_id: Optional[int] = None
+    # Start time sets automatically on backend usually, but can be passed
+
+
+class FocusSessionCreate(FocusSessionBase):
+    pass
+
+
+class FocusSessionUpdate(BaseModel):
+    # For patching status or adding interruptions
+    status: Optional[str] = None
+    interruption_notes: Optional[str] = None
+    feedback_score: Optional[int] = None
+
+
+class FocusSession(FocusSessionBase):
+    id: int
+    user_id: int
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration_minutes: int
+    interruptions: int
+    interruption_notes: Optional[str] = None
+    feedback_score: Optional[int] = None
+    status: str
+
+    class Config:
+        from_attributes = True
+
+
+class FocusStats(BaseModel):
+    total_sessions: int
+    total_minutes: int
+    avg_score: float
+    total_interruptions: int

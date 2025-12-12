@@ -1,10 +1,12 @@
 // src/pages/Settings.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api'; // We might need to add getUser/updateUser there
+import { useTranslation } from 'react-i18next';
+import api from '../api';
 
 const Settings = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [country, setCountry] = useState('US');
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
@@ -38,9 +40,6 @@ const Settings = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                // We need an endpoint to get current user info. 
-                // Currently usually just /users/me or similar. 
-                // Let's assume we implement getMe() in api.js
                 const { data } = await api.get('/users/me');
                 setCountry(data.country || 'US');
             } catch (err) {
@@ -55,62 +54,59 @@ const Settings = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            // Update user endpoint
             await api.put('/users/me', { country });
-            setMessage('Configuración guardada correctamente. 🎉');
+            setMessage(t('settings.save_success'));
         } catch (err) {
             console.error("Error updating settings", err);
-            setMessage('Error al guardar.');
+            setMessage(t('settings.save_error'));
         }
     };
 
-    if (loading) return <div style={{ padding: '2rem' }}>Cargando...</div>;
+    if (loading) return <div className="container mt-4">{t('common.loading')}</div>;
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-            <h2>⚙ Configuración</h2>
-            {message && <div style={{ padding: '1rem', background: '#e8f5e9', color: '#2e7d32', marginBottom: '1rem', borderRadius: '4px' }}>{message}</div>}
-
-            <form onSubmit={handleSave}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>País para Festivos:</label>
-                    <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
-                        Selecciona tu país para visualizar los días festivos en el calendario.
-                    </p>
-                    <select
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                    >
-                        {countries.map(c => (
-                            <option key={c.code} value={c.code}>{c.name}</option>
-                        ))}
-                    </select>
+        <div className="container" style={{ maxWidth: '600px', padding: '2rem 0' }}>
+            <h2 className="mb-4">⚙ {t('settings.title')}</h2>
+            {message && (
+                <div style={{ padding: '1rem', background: '#e8f5e9', color: '#2e7d32', marginBottom: '1rem', borderRadius: '4px' }}>
+                    {message}
                 </div>
+            )}
 
-                <button
-                    type="submit"
-                    style={{
-                        padding: '0.8rem 1.5rem',
-                        backgroundColor: '#2196f3',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    Guardar Cambios
-                </button>
-            </form>
+            <div className="card">
+                <form onSubmit={handleSave}>
+                    <div className="form-group">
+                        <label className="form-label">{t('settings.holiday_country')}</label>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                            {t('settings.holiday_country_desc')}
+                        </p>
+                        <select
+                            value={country}
+                            onChange={(e) => setCountry(e.target.value)}
+                            className="input-field"
+                        >
+                            {countries.map(c => (
+                                <option key={c.code} value={c.code}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
 
-            <div style={{ marginTop: '2rem' }}>
-                <button
-                    onClick={() => navigate('/')}
-                    style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', textDecoration: 'underline' }}
-                >
-                    Volver al Dashboard
-                </button>
+                    <div className="flex justify-between items-center mt-4">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className="btn btn-outline"
+                        >
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                        >
+                            {t('common.save')}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

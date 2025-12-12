@@ -1,5 +1,8 @@
+import { useTranslation } from 'react-i18next';
 
 const CustomToolbar = ({ label, onNavigate, onView, view }) => {
+    const { t } = useTranslation();
+
     // Funciones de navegación
     const goToBack = () => {
         onNavigate('PREV');
@@ -33,9 +36,9 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
     return (
         <div className="rbc-toolbar">
             <span className="rbc-btn-group">
-                <button type="button" onClick={goToCurrent} className="rbc-today">Hoy</button>
-                <button type="button" onClick={goToBack}>Anterior</button>
-                <button type="button" onClick={goToNext}>Siguiente</button>
+                <button type="button" onClick={goToCurrent} className="rbc-today">{t('calendar.today')}</button>
+                <button type="button" onClick={goToBack}>{t('calendar.previous')}</button>
+                <button type="button" onClick={goToNext}>{t('calendar.next')}</button>
             </span>
 
             <span className="rbc-toolbar-label">{label}</span>
@@ -46,28 +49,28 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
                     onClick={goToMonth}
                     className={view === 'month' ? 'rbc-active' : ''}
                 >
-                    Mes
+                    {t('calendar.month')}
                 </button>
                 <button
                     type="button"
                     onClick={goToWeek}
                     className={view === 'week' ? 'rbc-active' : ''}
                 >
-                    Semana
+                    {t('calendar.week')}
                 </button>
                 <button
                     type="button"
                     onClick={goToDay}
                     className={view === 'day' ? 'rbc-active' : ''}
                 >
-                    Día
+                    {t('calendar.day')}
                 </button>
                 <button
                     type="button"
                     onClick={goToAgenda}
                     className={view === 'agenda' ? 'rbc-active' : ''}
                 >
-                    Agenda
+                    {t('calendar.agenda')}
                 </button>
             </span>
         </div>

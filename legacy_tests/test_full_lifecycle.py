@@ -1,14 +1,18 @@
-import requests
 import sys
+
+import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 USER_EMAIL = "test_crud@example.com"
 USER_PASS = "crudpassword123"
 
+
 def get_token():
     # 1. Crear usuario si no existe (o ignorar error 400)
-    requests.post(f"{BASE_URL}/users/", json={"email": USER_EMAIL, "password": USER_PASS})
-    
+    requests.post(
+        f"{BASE_URL}/users/", json={"email": USER_EMAIL, "password": USER_PASS}
+    )
+
     # 2. Login
     login_data = {"username": USER_EMAIL, "password": USER_PASS}
     r = requests.post(f"{BASE_URL}/token", data=login_data)
@@ -17,10 +21,11 @@ def get_token():
     print(f"Error login: {r.status_code} {r.text}")
     sys.exit(1)
 
+
 def test_lifecycle():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     print("\n--- 1. CREATE TASK ---")
     task_data = {"title": "Task Original", "energy_required": "medium"}
     r = requests.post(f"{BASE_URL}/tasks/", json=task_data, headers=headers)
@@ -63,8 +68,9 @@ def test_lifecycle():
     r = requests.put(f"{BASE_URL}/tasks/{task_id}", json=update_data, headers=headers)
     assert r.status_code == 404, f"Expected 404, got {r.status_code}"
     print("PASS: Deletion verified")
-    
+
     print("\nSUCCESS: Full CRUD lifecycle verified!")
+
 
 if __name__ == "__main__":
     test_lifecycle()

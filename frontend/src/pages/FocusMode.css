@@ -1,0 +1,143 @@
+.focus-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    /* Use full screen */
+    color: var(--neutral-100);
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+    background-color: var(--neutral-900);
+    /* Dark mode feel */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.focus-header {
+    margin-bottom: var(--space-xl);
+}
+
+.focus-header h1 {
+    font-size: 2.5rem;
+    color: var(--neutral-50);
+    margin-bottom: var(--space-sm);
+}
+
+.focus-task-selector {
+    background: rgba(255, 255, 255, 0.05);
+    padding: var(--space-xl);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 500px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.focus-task-select {
+    width: 100%;
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    background: var(--neutral-800);
+    border: 1px solid var(--neutral-600);
+    border-radius: var(--radius-md);
+    color: var(--neutral-100);
+    font-size: 1.1rem;
+}
+
+.focus-task-select:focus {
+    outline: none;
+    border-color: var(--primary-500);
+}
+
+.focus-start-btn {
+    background: var(--primary-500);
+    color: white;
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+    /* Matches Ocean Teal */
+}
+
+.focus-start-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 188, 212, 0.5);
+    background: var(--primary-600);
+}
+
+.focus-session-active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.focus-current-task {
+    font-size: 1.5rem;
+    color: var(--neutral-300);
+    margin-bottom: var(--space-xl);
+}
+
+.focus-controls {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+}
+
+.focus-btn {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-lg);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 1rem;
+}
+
+.focus-btn-stop {
+    background: var(--danger);
+    color: white;
+}
+
+.focus-btn-stop:hover {
+    background: #dc2626;
+    /* Darker red */
+}
+
+.focus-btn-pause {
+    background: var(--warning);
+    color: var(--neutral-900);
+}
+
+.focus-btn-resume {
+    background: var(--success);
+    color: white;
+}
+
+.focus-btn-interrupt {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--neutral-200);
+    border: 1px solid var(--neutral-700);
+    margin-top: var(--space-xl);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: 0.9rem;
+}
+
+.focus-btn-interrupt:hover {
+    background: rgba(255, 255, 255, 0.2);
+}

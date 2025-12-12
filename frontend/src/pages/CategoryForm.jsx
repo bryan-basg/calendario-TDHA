@@ -1,12 +1,14 @@
 // src/pages/CategoryForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { createCategory, updateCategory, getCategory } from '../api';
 
 const CategoryForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEdit = Boolean(id);
+    const { t } = useTranslation();
 
     const [name, setName] = useState('');
     const [color, setColor] = useState('#50C878'); // Emerald green default
@@ -21,7 +23,7 @@ const CategoryForm = () => {
                     setColor(data.color_hex || '#50C878');
                 } catch (err) {
                     console.error('Error loading category', err);
-                    setError('No se pudo cargar la categoría');
+                    setError(t('categories.save_error', 'No se pudo cargar la categoría'));
                 }
             };
             fetchCat();
@@ -40,18 +42,18 @@ const CategoryForm = () => {
             navigate('/categories');
         } catch (err) {
             console.error('Error saving category', err);
-            setError('Error al guardar la categoría. Intenta de nuevo.');
+            setError(t('categories.save_error', 'Error al guardar la categoría. Intenta de nuevo.'));
         }
     };
 
     return (
         <div style={{ padding: '2rem', maxWidth: '500px', margin: '0 auto' }}>
-            <h2>{isEdit ? 'Editar Categoría' : 'Crear Nueva Categoría'}</h2>
+            <h2>{isEdit ? t('categories.edit_title', 'Editar Categoría') : t('categories.create_title', 'Crear Nueva Categoría')}</h2>
             {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                    <label htmlFor="name" style={{ display: 'block', marginBottom: '0.5rem' }}>Nombre de la Categoría:</label>
+                    <label htmlFor="name" style={{ display: 'block', marginBottom: '0.5rem' }}>{t('categories.name_label', 'Nombre de la Categoría:')}</label>
                     <input
                         type="text"
                         id="name"
@@ -60,13 +62,13 @@ const CategoryForm = () => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        placeholder="Ej. Trabajo, Universidad, Salud"
+                        placeholder={t('categories.placeholder', 'Ej. Trabajo, Universidad, Salud')}
                         style={{ width: '100%', padding: '0.5rem' }}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="color" style={{ display: 'block', marginBottom: '0.5rem' }}>Color Identificativo:</label>
+                    <label htmlFor="color" style={{ display: 'block', marginBottom: '0.5rem' }}>{t('categories.color_label', 'Color Identificativo:')}</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <input
                             type="color"
@@ -82,14 +84,14 @@ const CategoryForm = () => {
 
                 <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                     <button type="submit" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                        {isEdit ? 'Actualizar' : 'Guardar Categoría'}
+                        {isEdit ? t('categories.update_btn', 'Actualizar') : t('categories.save_btn', 'Guardar Categoría')}
                     </button>
                     <button
                         type="button"
                         onClick={() => navigate('/categories')}
                         style={{ padding: '0.75rem 1.5rem', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                     >
-                        Cancelar
+                        {t('common.cancel', 'Cancelar')}
                     </button>
                 </div>
             </form>

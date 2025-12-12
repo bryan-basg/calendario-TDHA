@@ -1,5 +1,6 @@
 // src/components/NowView.jsx
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getNowView, completeTask } from '../api';
 import './NowView.css';
 
@@ -7,6 +8,7 @@ const NowView = () => {
     const [nowData, setNowData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { t } = useTranslation();
 
     const fetchNowData = async () => {
         setLoading(true);
@@ -16,7 +18,7 @@ const NowView = () => {
             setError(null);
         } catch (err) {
             console.error(err);
-            setError('Error al cargar la vista "Ahora"');
+            setError(t('common.error', 'Error al cargar la vista "Ahora"'));
         } finally {
             setLoading(false);
         }
@@ -35,26 +37,26 @@ const NowView = () => {
         }
     };
 
-    if (loading) return <div>Cargando tu enfoque actual...</div>;
+    if (loading) return <div>{t('common.loading', 'Cargando tu enfoque actual...')}</div>;
     if (error) return <div style={{ color: 'red' }}>{error}</div>;
-    if (!nowData) return <div>No hay datos disponibles</div>;
+    if (!nowData) return <div>{t('common.no_data', 'No hay datos disponibles')}</div>;
 
     const { current_task, next_event, time_gap_minutes } = nowData;
 
     return (
         <div className="now-view-container">
-            <h2>🎯 Tu Enfoque Actual</h2>
+            <h2>{t('widgets.now_view_title', '🎯 Tu Enfoque Actual')}</h2>
 
             {/* Próximo Evento / Deadline */}
             <div className="next-event-section">
                 {next_event ? (
                     <div className="event-card">
-                        <h3>🗓️ Siguiente Evento: {next_event.title}</h3>
-                        <p>Inicio: {new Date(next_event.date_start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p className="time-gap">Faltan {time_gap_minutes} minutos</p>
+                        <h3>{t('widgets.next_event', '🗓️ Siguiente Evento:')} {next_event.title}</h3>
+                        <p>{t('widgets.starts_at', 'Inicio:')} {new Date(next_event.date_start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p className="time-gap">{t('widgets.missing_minutes', { minutes: time_gap_minutes, defaultValue: `Faltan ${time_gap_minutes} minutos` })}</p>
                     </div>
                 ) : (
-                    <p>No tienes eventos próximos inmediatos.</p>
+                    <p>{t('widgets.no_immediate_events', 'No tienes eventos próximos inmediatos.')}</p>
                 )}
             </div>
 
@@ -62,22 +64,22 @@ const NowView = () => {
             <div className="current-task-section">
                 {current_task ? (
                     <div className={`task-card-hero priority-${current_task.priority}`}>
-                        <h3>⚡ Tarea Sugerida:</h3>
+                        <h3>{t('widgets.suggested_task_hero', '⚡ Tarea Sugerida:')}</h3>
                         <div className="task-title">{current_task.title}</div>
-                        <p>Energía requerida: {current_task.energy_required}</p>
-                        <p>Deadline: {current_task.deadline ? new Date(current_task.deadline).toLocaleString() : 'Sin fecha límite'}</p>
+                        <p>{t('tasks.energy_label', 'Energía requerida:')} {current_task.energy_required}</p>
+                        <p>{t('tasks.deadline_label', 'Deadline:')} {current_task.deadline ? new Date(current_task.deadline).toLocaleString() : t('common.none', 'Sin fecha límite')}</p>
 
                         <button
                             className="complete-btn-hero"
                             onClick={() => handleCompleteTask(current_task.id)}
                         >
-                            ¡Hecho! ✅
+                            {t('widgets.done_btn', '¡Hecho! ✅')}
                         </button>
                     </div>
                 ) : (
                     <div className="free-time-card">
-                        <h3>🎉 ¡Tiempo Libre!</h3>
-                        <p>No tienes tareas críticas pendientes para este bloque. ¡Descansa o adelanta algo pequeño!</p>
+                        <h3>{t('widgets.free_time_title', '🎉 ¡Tiempo Libre!')}</h3>
+                        <p>{t('widgets.free_time_desc', 'No tienes tareas críticas pendientes para este bloque. ¡Descansa o adelanta algo pequeño!')}</p>
                     </div>
                 )}
             </div>

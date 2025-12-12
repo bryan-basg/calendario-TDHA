@@ -2,12 +2,10 @@ import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 
+
 def get_token():
     # Asume que el usuario test_jwt@example.com ya existe por el test anterior
-    login_data = {
-        "username": "test@example.com",
-        "password": "testpassword"
-    }
+    login_data = {"username": "test@example.com", "password": "testpassword"}
     r = requests.post(f"{BASE_URL}/token", data=login_data)
     if r.status_code == 200:
         return r.json()["access_token"]
@@ -15,9 +13,10 @@ def get_token():
         print(f"Error consiguiendo token: {r.status_code}")
         return None
 
+
 def test_tasks_endpoint():
     print("--- Test Endpoint Protegido /tasks/ ---")
-    
+
     # 1. Intento SIN token
     print("\n1. Probando acceso SIN token...")
     r = requests.get(f"{BASE_URL}/tasks/")
@@ -38,13 +37,14 @@ def test_tasks_endpoint():
         f.write(token)
     headers = {"Authorization": f"Bearer {token}"}
     r = requests.get(f"{BASE_URL}/tasks/", headers=headers)
-    
+
     if r.status_code == 200:
         tasks = r.json()
         print(f"PASS: Acceso permitido. Tareas recuperadas: {len(tasks)}")
         print(f"Respuesta: {tasks}")
     else:
         print(f"FAIL: Error accediendo con token: {r.status_code} - {r.text}")
+
 
 if __name__ == "__main__":
     test_tasks_endpoint()
