@@ -2,7 +2,7 @@
     "name": "calendario-tdha-root",
     "private": true,
     "scripts": {
-        "build": "cd frontend && npm install && npx vite build"
+        "build": "cd frontend && npm install --include=dev && npm run build"
     },
     "engines": {
         "node": ">=18.0.0"
