@@ -30,6 +30,11 @@ api.interceptors.request.use((config) => {
 
 // Response interceptor to handle errors
 api.interceptors.response.use((response) => response, (error: AxiosError | any) => {
+    // Check if we should skip global error handling for this request
+    if (error.config && (error.config as any).skipGlobalErrorHandler) {
+        return Promise.reject(error);
+    }
+
     let message = 'Error desconocido';
     if (error.response) {
         // Server responded with a status code other than 2xx
@@ -200,7 +205,10 @@ export const startFocusSession = async (taskId: number | null = null): Promise<F
 
 export const getCurrentFocusSession = async (): Promise<FocusSession | null> => {
     try {
-        const response = await api.get<FocusSession>('/focus/current');
+        const response = await api.get<FocusSession>('/focus/current', {
+            // @ts-ignore
+            skipGlobalErrorHandler: true
+        });
         return response.data;
     } catch (error: any) {
         if (error.response && error.response.status === 404) {

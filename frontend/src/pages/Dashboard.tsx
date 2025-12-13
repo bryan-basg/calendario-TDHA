@@ -1,3 +1,8 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { getTimeline, getTasks, getCategories } from '../api';
+
 // @ts-ignore
 import ProductivityTracker from '../components/ProductivityTracker';
 // @ts-ignore
