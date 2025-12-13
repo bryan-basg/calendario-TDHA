@@ -28,7 +28,7 @@ load_dotenv()
 # Esta línea está comentada para evitar conflictos con Alembic:
 # models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(root_path="/api" if os.getenv("ENVIRONMENT") == "production" else "")
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
